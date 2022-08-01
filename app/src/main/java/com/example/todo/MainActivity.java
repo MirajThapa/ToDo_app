@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this,DataInsert.class);
+                intent.putExtra("type","addMode");
                 startActivityForResult(intent,1);
             }
         });
@@ -61,7 +62,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                noteViewModel.delete(rvAdapter.getNote(viewHolder.getAdapterPosition()));
+                if (direction==ItemTouchHelper.LEFT){
+                    noteViewModel.delete(rvAdapter.getNote(viewHolder.getAdapterPosition()));
+                    Toast.makeText(MainActivity.this,"delete",Toast.LENGTH_SHORT).show();
+                }
+
             }
         }).attachToRecyclerView(activityMainBinding.mainRecyclerView);
 
@@ -76,7 +81,14 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 if (direction==ItemTouchHelper.RIGHT){
                     Toast.makeText(MainActivity.this,"update",Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(MainActivity.this,DataInsert.class);
+                    intent.putExtra("type","update");
+                    intent.putExtra("title",rvAdapter.getNote(viewHolder.getAdapterPosition()).getTitle());
+                    intent.putExtra("description",rvAdapter.getNote(viewHolder.getAdapterPosition()).getDesc());
+                    intent.putExtra("id",rvAdapter.getNote(viewHolder.getAdapterPosition()).getId());
+                    startActivityForResult(intent,2);
                 }
+
             }
         }).attachToRecyclerView(activityMainBinding.mainRecyclerView);
 
@@ -92,6 +104,14 @@ public class MainActivity extends AppCompatActivity {
             Note note = new Note(title,desc);
             noteViewModel.insert(note);
             Toast.makeText(MainActivity.this,"Added Note",Toast.LENGTH_SHORT).show();
+        }
+        else if(requestCode==2){
+            String title = data.getStringExtra("title");
+            String desc = data.getStringExtra("description");
+            Note note = new Note(title,desc);
+            note.setId(data.getIntExtra("id",0));
+            noteViewModel.update(note);
+            Toast.makeText(MainActivity.this,"Note updated",Toast.LENGTH_SHORT).show();
 
         }
     }
